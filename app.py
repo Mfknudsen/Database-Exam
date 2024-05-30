@@ -13,7 +13,7 @@ def predict():
     db_response = vector_search(query)
     source_material = ""
     for doc in db_response:
-        source_material += f"Title: {doc["title"]}, Content: {doc["content"]}, Url: {doc["url"]}\n"
+        source_material += f"Title: {doc['title']}, Content: {doc['content']}, Url: {doc['url']}\n"
     
     new_source_material = {
         "role": "assistant",
