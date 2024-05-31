@@ -20,21 +20,21 @@ userCollection = mydb["Users"]
 
 def read_or_create_chat_history(user_id):
     print("Im here!")
-    # user_conversations = list(conversationCollection.find({"user_id": user_id}))
+    user_conversations = list(conversationCollection.find({"user_id": user_id}))
     
-    # if not user_conversations:
-    initial_message = {
-        "role": "system",
-        "content": "You are a helpful chatbot that answers the users questions. You will be given source material and chat history and you are to only answer the last user question given, grounded in the documents you are given. If the answer is not in the documents do not answer"
-    }
-    new_conversation = {
-        "user_id": user_id,
-        "messages": [initial_message]
-    }
-    print("1")
-    conversationCollection.insert_one(new_conversation)
-    print("2")
-    user_conversations = [new_conversation]
+    if not user_conversations:
+        initial_message = {
+            "role": "system",
+            "content": "You are a helpful chatbot that answers the users questions. You will be given source material and chat history and you are to only answer the last user question given, grounded in the documents you are given. If the answer is not in the documents do not answer"
+        }
+        new_conversation = {
+            "user_id": user_id,
+            "messages": [initial_message]
+        }
+        print("1")
+        conversationCollection.insert_one(new_conversation)
+        print("2")
+        user_conversations = [new_conversation]
     
     return user_conversations
 
