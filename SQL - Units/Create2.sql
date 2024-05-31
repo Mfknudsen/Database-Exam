@@ -61,7 +61,7 @@ DROP TABLE IF EXISTS `mydb`.`Unit` ;
 CREATE TABLE IF NOT EXISTS `mydb`.`Unit` (
   `id` VARCHAR(45) NOT NULL,
   `faction_id` VARCHAR(45) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(90) NOT NULL,
   `description` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
@@ -100,8 +100,8 @@ DROP TABLE IF EXISTS `mydb`.`Model` ;
 CREATE TABLE IF NOT EXISTS `mydb`.`Model` (
   `id` VARCHAR(45) NOT NULL,
   `name` VARCHAR(45) NOT NULL,
-  `move` VARCHAR(3) NOT NULL,
-  `toughness` INT NOT NULL,
+  `move` VARCHAR(5) NOT NULL,
+  `toughness` VARCHAR(5) NOT NULL,
   `wounds` INT NOT NULL,
   `leadership` VARCHAR(3) NOT NULL,
   `save` VARCHAR(3) NOT NULL,
@@ -125,19 +125,19 @@ DROP TABLE IF EXISTS `mydb`.`Weapon` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`Weapon` (
   `id` VARCHAR(45) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
-  `weapon_range` VARCHAR(5) NOT NULL,
-  `strength` INT NOT NULL,
-  `armor_piercing` VARCHAR(2) NOT NULL,
-  `damage` VARCHAR(2) NOT NULL,
-  `hit_skill` VARCHAR(2) NOT NULL,
-  `attack` VARCHAR(2) NOT NULL,
+  `name` VARCHAR(90) NOT NULL,
+  `weapon_range` VARCHAR(10) NOT NULL,
+  `strength` VARCHAR(5) NOT NULL,
+  `armor_piercing` VARCHAR(10) NOT NULL,
+  `damage` VARCHAR(10) NOT NULL,
+  `hit_skill` VARCHAR(10) NOT NULL,
+  `attack` VARCHAR(10) NOT NULL,
   `unit_id` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_Weapon_Model1_idx` (`unit_id` ASC) VISIBLE,
-  CONSTRAINT `fk_Weapon_Model1`
+  INDEX `fk_Weapon_Unit1_idx` (`unit_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Weapon_Unit1`
     FOREIGN KEY (`unit_id`)
-    REFERENCES `mydb`.`Model` (`id`)
+    REFERENCES `mydb`.`Unit` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -150,25 +150,9 @@ DROP TABLE IF EXISTS `mydb`.`WeaponKeyword` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`WeaponKeyword` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`SpecialRules`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`SpecialRules` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`SpecialRules` (
-  `unit_id` VARCHAR(45) NOT NULL,
-  `rule` VARCHAR(45) NOT NULL,
-  INDEX `fk_SpecialRules_Unit1_idx` (`unit_id` ASC) VISIBLE,
-  CONSTRAINT `fk_SpecialRules_Unit1`
-    FOREIGN KEY (`unit_id`)
-    REFERENCES `mydb`.`Unit` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  `name` VARCHAR(90) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
 ENGINE = InnoDB;
 
 
@@ -179,20 +163,7 @@ DROP TABLE IF EXISTS `mydb`.`ModelKeyword` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`ModelKeyword` (
   `id` VARCHAR(45) NOT NULL,
-  `text` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`WeaponAbility`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`WeaponAbility` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`WeaponAbility` (
-  `id` VARCHAR(45) NOT NULL,
-  `description` VARCHAR(300) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `text` VARCHAR(90) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -204,8 +175,8 @@ DROP TABLE IF EXISTS `mydb`.`ModelAbility` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`ModelAbility` (
   `id` VARCHAR(45) NOT NULL,
-  `description` VARCHAR(600) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `description` VARCHAR(1000) NOT NULL,
+  `name` VARCHAR(90) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -219,7 +190,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`WeaponHasKeyword` (
   `Weapon_id` VARCHAR(45) NOT NULL,
   `WeaponKeyword_id` INT NOT NULL,
   INDEX `fk_WeaponHasKeyword_Weapon1_idx` (`Weapon_id` ASC) VISIBLE,
-  INDEX `fk_WeaponHasKeyword_WeaponKeyword1_idx` (`WeaponKeyword_id` ASC) VISIBLE,
   CONSTRAINT `fk_WeaponHasKeyword_Weapon1`
     FOREIGN KEY (`Weapon_id`)
     REFERENCES `mydb`.`Weapon` (`id`)
@@ -228,29 +198,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`WeaponHasKeyword` (
   CONSTRAINT `fk_WeaponHasKeyword_WeaponKeyword1`
     FOREIGN KEY (`WeaponKeyword_id`)
     REFERENCES `mydb`.`WeaponKeyword` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`WeaponHasAbility`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`WeaponHasAbility` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`WeaponHasAbility` (
-  `Weapon_id` VARCHAR(45) NOT NULL,
-  `WeaponAbility_id` VARCHAR(45) NOT NULL,
-  INDEX `fk_WeaponHasAbility_Weapon1_idx` (`Weapon_id` ASC) VISIBLE,
-  INDEX `fk_WeaponHasAbility_WeaponAbility1_idx` (`WeaponAbility_id` ASC) VISIBLE,
-  CONSTRAINT `fk_WeaponHasAbility_Weapon1`
-    FOREIGN KEY (`Weapon_id`)
-    REFERENCES `mydb`.`Weapon` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_WeaponHasAbility_WeaponAbility1`
-    FOREIGN KEY (`WeaponAbility_id`)
-    REFERENCES `mydb`.`WeaponAbility` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
