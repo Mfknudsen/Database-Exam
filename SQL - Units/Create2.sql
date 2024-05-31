@@ -82,7 +82,7 @@ DROP TABLE IF EXISTS `mydb`.`UnitCost` ;
 CREATE TABLE IF NOT EXISTS `mydb`.`UnitCost` (
   `unit_id` VARCHAR(45) NOT NULL,
   `model_count` VARCHAR(45) NOT NULL,
-  `cost` INT NOT NULL,
+  `cost` VARCHAR(45) NOT NULL,
   INDEX `fk_UnitCost_Unit1_idx` (`unit_id` ASC) VISIBLE,
   CONSTRAINT `fk_UnitCost_Unit1`
     FOREIGN KEY (`unit_id`)
