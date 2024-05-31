@@ -1,12 +1,13 @@
 import tkinter as tk
 import requests
-from llm import read_or_create_chat_history, write_to_file, create_new_chat
+from llm import read_or_create_chat_history, write_to_db, create_new_chat
 
-chat_history = read_or_create_chat_history("chat_history")
+user_id = "example_user_id"  # Replace with logic to get the current user's ID
+chat_history = read_or_create_chat_history(user_id)
 
-chat_history_no = len(chat_history) -1
-
-conversation = chat_history[-1]
+chat_history_no = len(chat_history) - 1
+conversation = chat_history[-1]["messages"]
+conversation_id = chat_history[-1]["_id"]
 
 def format_conversation(conversation):
     formatted = ""
@@ -24,18 +25,18 @@ def chat():
     new_question = {'role': 'user', 'content': query}
     global conversation
     conversation.append(new_question)
-    write_to_file("chat_history", chat_history_no, new_question)
+    write_to_db(user_id, conversation_id, new_question)
     
     url = 'http://127.0.0.1:5000/chat'  # Change this if your Flask app runs on a different port
     data = {
-    'query': query,
-    'conversation': conversation,
-    'chat_history_no': chat_history_no
+        'query': query,
+        'conversation': conversation,
+        'chat_history_no': chat_history_no
     }
     response = requests.post(url, json=data)
     new_answer = {'role': 'assistant', 'content': response.json()}
     conversation.append(new_answer)
-    write_to_file("chat_history", chat_history_no, new_answer)
+    write_to_db(user_id, conversation_id, new_answer)
     update_result_label()
     update_buttons()
 
@@ -45,7 +46,7 @@ root.geometry("800x600")
 
 def create_entry_with_label(root, label_text):
     frame = tk.Frame(root)
-    frame.pack(pady=10)  
+    frame.pack(pady=10)
     frame.pack()
     
     label = tk.Label(frame, text=label_text)
@@ -59,22 +60,24 @@ def create_entry_with_label(root, label_text):
 def set_chat_history_no(number):
     global chat_history_no
     global conversation
+    global conversation_id
     chat_history_no = number
-    conversation = chat_history[number]
+    conversation_id = chat_history[number]["_id"]
+    conversation = chat_history[number]["messages"]
     update_result_label()
 
 def new_chat():
     global chat_history_no
     global chat_history
     global conversation
+    global conversation_id
     print(len(chat_history))
     chat_history_no = len(chat_history)
-    create_new_chat("chat_history", chat_history_no)
-    chat_history = read_or_create_chat_history("chat_history")
-    conversation = chat_history[chat_history_no]
+    conversation_id = create_new_chat(user_id)
+    chat_history = read_or_create_chat_history(user_id)
+    conversation = chat_history[chat_history_no]["messages"]
     update_buttons()
     update_result_label()
-
 
 def create_button(root, title, number):
     button = tk.Button(root, text=title, width=20, command=lambda: set_chat_history_no(number))
@@ -92,7 +95,7 @@ result_label.pack()
 
 button_array = []
 for index, chat_content_item in enumerate(chat_history):
-    for chat_content in reversed(chat_content_item):
+    for chat_content in reversed(chat_content_item["messages"]):
         if chat_content.get('role') == 'user':
             last_user_content = chat_content.get('content')
             button = create_button(root, last_user_content[:25], index)
@@ -105,7 +108,7 @@ def update_buttons():
     button_array.clear() 
     
     for index, chat_content_item in enumerate(chat_history):
-        for chat_content in reversed(chat_content_item):
+        for chat_content in reversed(chat_content_item["messages"]):
             if chat_content.get('role') == 'user':
                 last_user_content = chat_content.get('content')
                 button = create_button(root, last_user_content[:20], index)
