@@ -1,26 +1,22 @@
+import pymongo
 import os
 import json
 from openai import OpenAI
 from dotenv import load_dotenv
-import pymongo
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 dotenv_path = os.path.join(os.path.dirname(__file__), 'config.env')
 load_dotenv(dotenv_path, verbose=True)
 
 client = OpenAI(api_key=os.environ.get("OPENAI_KEY"))
 
-myclient = pymongo.MongoClient(os.environ.get("MONGODB_URI_CH"))
-mydb = myclient["DBExam"]
+cluster = MongoClient(os.environ.get("MONGO_URI_CH"))
+
+mydb = cluster["DBExam"]
 conversationCollection = mydb["Conversations"]
 messagesCollection = mydb["Messages"]
 userCollection = mydb["Users"]
-
-
-print("--------")
-print(conversationCollection)
-print(messagesCollection)
-print(userCollection)
-print("--------")
 
 def read_or_create_chat_history(user_id):
     print("Im here!")
