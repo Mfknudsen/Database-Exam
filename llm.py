@@ -35,7 +35,7 @@ def read_or_create_chat_history(user_id):
     
     return user_conversations
 
-def write_to_db(user_id, conversation_id, new_entry):
+def write_to_db(conversation_id, new_entry):
     conversationCollection.update_one(
         {"_id": conversation_id},
         {"$push": {"messages": new_entry}}
@@ -54,7 +54,6 @@ def create_new_chat(user_id):
     return conversation_id
 
 def generate_response(conversation):
-    print(conversation)
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=conversation,

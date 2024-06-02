@@ -27,7 +27,7 @@ def chat():
     new_question = {'role': 'user', 'content': query}
     global conversation
     conversation.append(new_question)
-    write_to_db(user_id, conversation_id, new_question)
+    write_to_db(conversation_id, new_question)
     
     url = 'http://127.0.0.1:5000/chat'  # Change this if your Flask app runs on a different port
     data = {
@@ -36,9 +36,10 @@ def chat():
         'chat_history_no': chat_history_no
     }
     response = requests.post(url, json=data)
+
     new_answer = {'role': 'assistant', 'content': response.json()}
     conversation.append(new_answer)
-    write_to_db(user_id, conversation_id, new_answer)
+    write_to_db(conversation_id, new_answer)
     update_result_label()
     update_buttons()
 def create_entry_with_label(root, label_text):
@@ -68,7 +69,6 @@ def new_chat():
     global chat_history
     global conversation
     global conversation_id
-    print(len(chat_history))
     chat_history_no = len(chat_history)
     conversation_id = create_new_chat(user_id)
     chat_history = read_or_create_chat_history(user_id)
@@ -96,6 +96,7 @@ def update_user_data():
     chat_history_no = len(chat_history) - 1
     conversation = chat_history[-1]["messages"]
     conversation_id = chat_history[-1]["_id"]
+
     update_buttons()
     update_result_label()
 
