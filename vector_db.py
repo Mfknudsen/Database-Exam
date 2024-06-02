@@ -50,6 +50,12 @@ data_to_upsert = [
     for row in csv.iterrows()
 ]
 
+query = "Who led the 13th black crusade?"
+
+vector_query = get_embeddings(query)
+
 
 if __name__ == '__main__':
-    index.upsert(vectors=data_to_upsert)
+    #index.upsert(vectors=data_to_upsert)
+    res = index.query(vector=[vector_query], top_k=5, include_metadata=True)
+    print(res)
