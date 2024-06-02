@@ -8,3 +8,4 @@ __pycache__/Model.cpython-310.pyc
 .idea/inspectionProfiles/Project_Default.xml
 .idea/misc.xml
 .idea/vcs.xml
+.venv/
