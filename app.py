@@ -5,6 +5,7 @@ from llm import generate_response
 
 app = Flask(__name__)
 
+
 @app.route('/chat', methods=['POST'])
 def predict():
     req = request.json
@@ -17,7 +18,6 @@ def predict():
     for doc in db_response['matches']:
         source_material += f"Content: {doc['metadata']['content']}"
 
-    
     new_source_material = {
         "role": "assistant",
         "content": source_material,
@@ -26,9 +26,9 @@ def predict():
     conversation.append(new_source_material)
 
     llm_response = generate_response(conversation)
-    
 
     return jsonify(llm_response)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

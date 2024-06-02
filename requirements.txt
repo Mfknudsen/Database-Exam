@@ -5,3 +5,4 @@ openai
 flask
 pymongo
 mysql-connector-python
+pinecone
