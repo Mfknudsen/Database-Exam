@@ -1,10 +1,10 @@
-import pymongo
+
 import os
 import json
 from openai import OpenAI
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+
 
 dotenv_path = os.path.join(os.path.dirname(__file__), 'config.env')
 load_dotenv(dotenv_path, verbose=True)

@@ -1,0 +1,7 @@
+mysql
+lxml
+python-dotenv
+openai
+flask
+pymongo
+mysql-connector-python

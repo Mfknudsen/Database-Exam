@@ -1,7 +1,5 @@
 import os
-from pprint import pprint
 from openai import OpenAI
-import bson
 from dotenv import load_dotenv
 import pymongo
 from pinecone import Pinecone
@@ -22,7 +20,7 @@ index = pc.Index("units")
 db = client["cluster0"]
 
 # Get a reference to the "movies" collection:
-collection  = db["40klore"]
+collection = db["40klore"]
 
 def get_embeddings(text):
     key = os.environ['OPENAI_KEY']
