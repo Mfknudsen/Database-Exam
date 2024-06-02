@@ -2,9 +2,11 @@ import tkinter as tk
 import requests
 from llm import read_or_create_chat_history, write_to_db, create_new_chat
 
-user_id = "example_user_id"  # Replace with logic to get the current user's ID
-chat_history = read_or_create_chat_history(user_id)
+root = tk.Tk()
+root.title("Warhammer lore chat bot")
+root.geometry("800x600")
 
+chat_history = read_or_create_chat_history("default_user_id")  # Initial user_id
 chat_history_no = len(chat_history) - 1
 conversation = chat_history[-1]["messages"]
 conversation_id = chat_history[-1]["_id"]
@@ -39,11 +41,6 @@ def chat():
     write_to_db(user_id, conversation_id, new_answer)
     update_result_label()
     update_buttons()
-
-root = tk.Tk()
-root.title("Warhammer lore chat bot")
-root.geometry("800x600")  
-
 def create_entry_with_label(root, label_text):
     frame = tk.Frame(root)
     frame.pack(pady=10)
@@ -83,6 +80,28 @@ def create_button(root, title, number):
     button = tk.Button(root, text=title, width=20, command=lambda: set_chat_history_no(number))
     button.pack(side="bottom", anchor="w", padx=10, pady=5)
     return button
+
+def get_user():
+    global user_id
+    user_id = username_entry.get()
+    update_user_data()
+
+def update_user_data():
+    global chat_history
+    global chat_history_no
+    global conversation
+    global conversation_id
+
+    chat_history = read_or_create_chat_history(user_id)
+    chat_history_no = len(chat_history) - 1
+    conversation = chat_history[-1]["messages"]
+    conversation_id = chat_history[-1]["_id"]
+    update_buttons()
+    update_result_label()
+
+username_entry = create_entry_with_label(root, "Write username: ")
+username_button = tk.Button(root, text="Set Username", command=get_user)
+username_button.pack()
 
 query_entry = create_entry_with_label(root, "Ask away: ")
 
