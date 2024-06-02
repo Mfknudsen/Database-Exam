@@ -4,14 +4,19 @@ from openai import OpenAI
 import bson
 from dotenv import load_dotenv
 import pymongo
+from pinecone import Pinecone
 
 # Load config from a .env file:
 dotenv_path = os.path.join(os.path.dirname(__file__), 'config.env')
 load_dotenv(dotenv_path,verbose=True)
-MONGODB_URI = os.environ["MONGO_URI"]
+MONGODB_URI = os.environ["MONGO_URI_CH"]
 
 # Connect to your MongoDB cluster:
 client = pymongo.MongoClient(MONGODB_URI)
+
+# Connect to pinecone
+pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+index = pc.Index("units")
 
 # Get a reference to the "sample_mflix" database:
 db = client["cluster0"]
@@ -25,29 +30,12 @@ def get_embeddings(text):
     return client.embeddings.create(input = [text], model="text-embedding-3-small").data[0].embedding
 
 
-def vector_search(query, num_results=10):
+def vector_search(query, num_results=5):
     query_emb = get_embeddings(query)
-    pipeline = [
-        {
-            "$vectorSearch": {
-                "index": "vector_index",
-                "path": "embedding",
-                "queryVector": query_emb,
-                "numCandidates": 200,
-                "limit": num_results
-            }
-        }
-    ]
-    return collection.aggregate(pipeline)
-
-if __name__ == '__main__':
-    query = "Who led the 13th black crusade?"
-
-    results = vector_search(query)
-
-    for doc in results:
-        print(" * {title}, {content}, {url}".format(
-            title=doc["title"],
-            content=doc["content"],
-            url=doc["url"],
-    ))
+    pipeline = index.query(
+        vector=query_emb,
+        top_k=num_results,
+        include_values=False,
+        include_metadata=True,
+    )
+    return pipeline
