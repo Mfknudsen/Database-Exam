@@ -16,7 +16,7 @@ def predict():
 
     source_material = ""
     for doc in db_response['matches']:
-        source_material += f"Content: {doc['metadata']['content']}"
+        source_material += f"Content: {doc['metadata']['text']}"
 
     new_source_material = {
         "role": "assistant",
@@ -31,4 +31,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5003)

@@ -1,6 +1,7 @@
 import tkinter as tk
 import requests
 from llm import read_or_create_chat_history, write_to_db, create_new_chat
+from neo4jDB import create_user
 
 root = tk.Tk()
 root.title("Warhammer lore chat bot")
@@ -29,7 +30,7 @@ def chat():
     conversation.append(new_question)
     write_to_db(conversation_id, new_question)
     
-    url = 'http://127.0.0.1:5000/chat'  # Change this if your Flask app runs on a different port
+    url = 'http://127.0.0.1:5003/chat'  # Change this if your Flask app runs on a different port
     data = {
         'query': query,
         'conversation': conversation,
@@ -42,6 +43,7 @@ def chat():
     write_to_db(conversation_id, new_answer)
     update_result_label()
     update_buttons()
+
 def create_entry_with_label(root, label_text):
     frame = tk.Frame(root)
     frame.pack(pady=10)
@@ -96,6 +98,8 @@ def update_user_data():
     chat_history_no = len(chat_history) - 1
     conversation = chat_history[-1]["messages"]
     conversation_id = chat_history[-1]["_id"]
+
+    create_user(user_id)
 
     update_buttons()
     update_result_label()

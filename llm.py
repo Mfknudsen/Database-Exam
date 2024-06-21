@@ -4,7 +4,7 @@ import json
 from openai import OpenAI
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
-
+from neo4jDB import create_conversation
 
 dotenv_path = os.path.join(os.path.dirname(__file__), 'config.env')
 load_dotenv(dotenv_path, verbose=True)
@@ -32,6 +32,8 @@ def read_or_create_chat_history(user_id):
         }
         conversationCollection.insert_one(new_conversation)
         user_conversations = [new_conversation]
+
+        create_conversation(user_id)
     
     return user_conversations
 
@@ -51,6 +53,7 @@ def create_new_chat(user_id):
         "messages": [initial_message]
     }
     conversation_id = conversationCollection.insert_one(new_conversation).inserted_id
+    create_conversation(user_id)
     return conversation_id
 
 def generate_response(conversation):
