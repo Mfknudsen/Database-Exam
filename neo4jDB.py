@@ -12,8 +12,11 @@ password = os.environ["NEO4J_PASSWORD"]
 driver = GraphDatabase.driver(uri, auth=(user, password))
 
 def create_user(username):
-    with driver.session() as session:
-        session.write_transaction(_create_user_node, username)
+    try:
+        with driver.session() as session:
+            session.write_transaction(_create_user_node, username)
+    except Exception as e:
+        print(f"Error creating user node in Neo4j: {str(e)}")
 
 def _create_user_node(tx, username):
     query = (

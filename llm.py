@@ -4,7 +4,7 @@ import json
 from openai import OpenAI
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
-from neo4jDB import create_conversation
+from neo4jDB import create_conversation, create_user
 
 dotenv_path = os.path.join(os.path.dirname(__file__), 'config.env')
 load_dotenv(dotenv_path, verbose=True)
@@ -55,6 +55,17 @@ def create_new_chat(user_id):
     conversation_id = conversationCollection.insert_one(new_conversation).inserted_id
     create_conversation(user_id)
     return conversation_id
+
+def create_new_user(user):
+    try:
+        if user:
+            user_id = userCollection.insert_one(user).inserted_id
+            create_user(user_id)
+            return {"status": "success", "user_id": user_id}
+        else:
+            return {"status": "error", "message": "User data is empty"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 def generate_response(conversation):
     response = client.chat.completions.create(
