@@ -7,6 +7,8 @@ from pinecone import Pinecone
 dotenv_path = os.path.join(os.path.dirname(__file__), 'config.env')
 load_dotenv(dotenv_path,verbose=True)
 
+client = OpenAI(api_key=os.environ.get("OPENAI_KEY"))
+
 # Connect to pinecone Lore Vector DB
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 index = pc.Index("lore")
@@ -26,3 +28,11 @@ def vector_search(query, num_results=5):
         include_metadata=True,
     )
     return pipeline
+
+def generate_response(conversation):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=conversation,
+        max_tokens=150
+    )
+    return response.choices[0].message.content

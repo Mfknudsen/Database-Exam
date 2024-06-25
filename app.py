@@ -1,7 +1,6 @@
 import os
 from flask import Flask, jsonify, request
-from Model import vector_search
-from llm import generate_response
+from Model import vector_search, generate_response
 
 app = Flask(__name__)
 

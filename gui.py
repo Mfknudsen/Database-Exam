@@ -1,7 +1,6 @@
 import tkinter as tk
 import requests
-from llm import read_or_create_chat_history, write_to_db, create_new_chat, create_new_user
-from neo4jDB import create_user
+from DBHandler import read_or_create_chat_history, write_to_db, create_new_chat, create_new_user
 
 def main_interface():
     root = tk.Tk()
@@ -9,7 +8,8 @@ def main_interface():
     root.geometry("800x600")
 
     global chat_history
-    chat_history = read_or_create_chat_history(user_id)  # Initial user_id
+    global user_id
+    chat_history = read_or_create_chat_history(user_id)
     global chat_history_no
     chat_history_no = len(chat_history) - 1
     global conversation
@@ -131,33 +131,51 @@ def login_screen():
     login_root.geometry("800x600")
 
     def login():
-        global user_id
-        user_id = login_username_entry.get()
-        if user_id:
-            create_user(user_id)  # Ensure user exists in the database
+        global username
+        username = login_username_entry.get()
+        password = login_password_entry.get()
+        if username and password:
+            # Validate user credentials or create session
             login_root.destroy()
             main_interface()
 
     def signup():
+        global username
         global user_id
-        user_id = signup_username_entry.get()
-        if user_id:
-            user_data = {"username": user_id}  # Adjust this based on your user data schema
+        username = signup_username_entry.get()
+        password = signup_password_entry.get()
+        email = signup_email_entry.get()
+        phone = signup_phone_entry.get()
+        country = signup_country_entry.get()
+        
+        if username and password and email and phone and country:
+            user_data = {
+                "username": username,
+                "password": password,
+                "email": email,
+                "phone": phone,
+                "country": country
+            }
             result = create_new_user(user_data)
             if result["status"] == "success":
+                user_id = result["user_id"]
                 login_root.destroy()
                 main_interface()
             else:
                 error_label.config(text=f"Signup Error: {result['message']}")
 
-    def create_entry_with_label(root, label_text, width=30):
+    def create_entry_with_label(root, label_text, width=30, is_password=False):
         frame = tk.Frame(root)
         frame.pack(pady=10)
 
         label = tk.Label(frame, text=label_text)
         label.pack(side="left")
 
-        entry = tk.Entry(frame, width=width)
+        if is_password:
+            entry = tk.Entry(frame, width=width, show="*")  # show="*" to hide password
+        else:
+            entry = tk.Entry(frame, width=width)
+
         entry.pack(side="left")
 
         return entry
@@ -167,6 +185,7 @@ def login_screen():
     login_label.pack(pady=10)
 
     login_username_entry = create_entry_with_label(login_root, "Username: ")
+    login_password_entry = create_entry_with_label(login_root, "Password: ", is_password=True)
 
     login_button = tk.Button(login_root, text="Login", command=login)
     login_button.pack(pady=5)
@@ -176,6 +195,10 @@ def login_screen():
     signup_label.pack(pady=10)
 
     signup_username_entry = create_entry_with_label(login_root, "Username: ")
+    signup_password_entry = create_entry_with_label(login_root, "Password: ", is_password=True)
+    signup_email_entry = create_entry_with_label(login_root, "Email: ")
+    signup_phone_entry = create_entry_with_label(login_root, "Phone: ")
+    signup_country_entry = create_entry_with_label(login_root, "Country: ")
 
     signup_button = tk.Button(login_root, text="Signup", command=signup)
     signup_button.pack(pady=5)
@@ -184,6 +207,8 @@ def login_screen():
     error_label.pack()
 
     login_root.mainloop()
+
+login_screen()
 
 if __name__ == "__main__":
     login_screen()

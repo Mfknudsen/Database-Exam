@@ -11,31 +11,20 @@ password = os.environ["NEO4J_PASSWORD"]
 
 driver = GraphDatabase.driver(uri, auth=(user, password))
 
-def create_user(username):
-    try:
-        with driver.session() as session:
-            session.write_transaction(_create_user_node, username)
-    except Exception as e:
-        print(f"Error creating user node in Neo4j: {str(e)}")
-
-def _create_user_node(tx, username):
+def create_user_node(tx, username, user_id):
     query = (
-        "CREATE (u:User {username: $username}) "
+        "CREATE (u:User {username: $username, user_id: $user_id}) "
         "RETURN u"
     )
-    result = tx.run(query, username=username)
+    result = tx.run(query, username=username, user_id=user_id)
     return result.single()[0]
 
-def create_conversation(username):
-    with driver.session() as session:
-        session.write_transaction(_create_conversation_node, username)
-
-def _create_conversation_node(tx, username):
+def create_conversation_node(tx, user_id, conversation_id):
     query = (
-        "MATCH (u:User {username: $username}) "
-        "CREATE (u)-[:HAS_CONVERSATION]->(c:Conversation) "
+        "MATCH (u:User {user_id: $user_id}) "
+        "CREATE (u)-[:HAS_CONVERSATION]->(c:Conversation {conversation_id: $conversation_id}) "
         "RETURN c"
     )
-    result = tx.run(query, username=username)
+    result = tx.run(query, user_id=user_id, conversation_id=conversation_id)
     return result.single()[0]
 
