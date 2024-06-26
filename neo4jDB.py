@@ -28,3 +28,12 @@ def create_conversation_node(tx, user_id, conversation_id):
     result = tx.run(query, user_id=user_id, conversation_id=conversation_id)
     return result.single()[0]
 
+def create_message_node(tx, conversation_id, content, role, original):
+    query = (
+        "MATCH (c:Conversation {conversation_id: $conversation_id}) "
+        "CREATE (c)-[:HAS_MESSAGE {role: $role, original: $original}]->(m:Message {content: $content}) "
+        "RETURN m"
+    )
+    result = tx.run(query, conversation_id=conversation_id, content=content, role=role, original=original)
+    return result.single()[0]
+

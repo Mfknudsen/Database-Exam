@@ -1,6 +1,6 @@
 import tkinter as tk
 import requests
-from DBHandler import read_or_create_chat_history, write_to_db, create_new_chat, create_new_user
+from DBHandler import read_or_create_chat_history, write_answer_db, write_question_db, create_new_chat, create_new_user, login_db
 
 def main_interface():
     root = tk.Tk()
@@ -33,7 +33,7 @@ def main_interface():
         new_question = {'role': 'user', 'content': query}
         global conversation
         conversation.append(new_question)
-        write_to_db(conversation_id, new_question)
+        write_question_db(conversation_id, new_question, True)
 
         url = 'http://127.0.0.1:5003/chat'  # Change this if your Flask app runs on a different port
         data = {
@@ -45,7 +45,7 @@ def main_interface():
 
         new_answer = {'role': 'assistant', 'content': response.json()}
         conversation.append(new_answer)
-        write_to_db(conversation_id, new_answer)
+        write_answer_db(conversation_id, new_answer)
         update_result_label()
         update_buttons()
 
@@ -132,32 +132,36 @@ def login_screen():
 
     def login():
         global username
-        username = login_username_entry.get()
-        password = login_password_entry.get()
-        if username and password:
-            # Validate user credentials or create session
-            login_root.destroy()
-            main_interface()
+        global user_id
+        username_input = login_username_entry.get()
+        if username_input:
+            result = login_db(username_input)
+            if result["status"] == "success":
+                username = username_input
+                user_id = result["user_id"]
+                login_root.destroy()
+                main_interface()
+            else:
+                error_label.config(text={result['message']})
 
     def signup():
         global username
         global user_id
-        username = signup_username_entry.get()
-        password = signup_password_entry.get()
+        username_input = signup_username_entry.get()
         email = signup_email_entry.get()
         phone = signup_phone_entry.get()
         country = signup_country_entry.get()
         
-        if username and password and email and phone and country:
+        if username_input and email and phone and country:
             user_data = {
-                "username": username,
-                "password": password,
+                "username": username_input,
                 "email": email,
                 "phone": phone,
                 "country": country
             }
             result = create_new_user(user_data)
             if result["status"] == "success":
+                username = username_input
                 user_id = result["user_id"]
                 login_root.destroy()
                 main_interface()
@@ -171,10 +175,8 @@ def login_screen():
         label = tk.Label(frame, text=label_text)
         label.pack(side="left")
 
-        if is_password:
-            entry = tk.Entry(frame, width=width, show="*")  # show="*" to hide password
-        else:
-            entry = tk.Entry(frame, width=width)
+        
+        entry = tk.Entry(frame, width=width)
 
         entry.pack(side="left")
 
@@ -185,7 +187,6 @@ def login_screen():
     login_label.pack(pady=10)
 
     login_username_entry = create_entry_with_label(login_root, "Username: ")
-    login_password_entry = create_entry_with_label(login_root, "Password: ", is_password=True)
 
     login_button = tk.Button(login_root, text="Login", command=login)
     login_button.pack(pady=5)
@@ -195,7 +196,6 @@ def login_screen():
     signup_label.pack(pady=10)
 
     signup_username_entry = create_entry_with_label(login_root, "Username: ")
-    signup_password_entry = create_entry_with_label(login_root, "Password: ", is_password=True)
     signup_email_entry = create_entry_with_label(login_root, "Email: ")
     signup_phone_entry = create_entry_with_label(login_root, "Phone: ")
     signup_country_entry = create_entry_with_label(login_root, "Country: ")
