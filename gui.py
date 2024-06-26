@@ -6,7 +6,7 @@ from neo4jDB import suggest_topics, find_message_by_topic
 def main_interface():
     root = tk.Tk()
     root.title("Warhammer lore chat bot")
-    root.geometry("1200x900")
+    root.geometry("800x600")
 
     global chat_history
     global user_id
