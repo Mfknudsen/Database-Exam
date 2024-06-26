@@ -97,7 +97,8 @@ def write_question_db(conversation_id, new_question, original):
                             str(conversation_id), 
                             new_question['content'], 
                             new_question['role'], 
-                            original
+                            original,
+                            new_question['topic']
                         )
                 except Exception as neo4j_error:
                     mongo_session.abort_transaction()

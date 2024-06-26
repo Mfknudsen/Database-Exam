@@ -13,9 +13,12 @@ def predict():
 
     db_response = vector_search(query)
 
+    topic = "Off topic"
     source_material = ""
-    for doc in db_response['matches']:
-        source_material += f"Content: {doc['metadata']['text']}"
+    if 'matches' in db_response and len(db_response['matches']) > 0:
+        topic = db_response['matches'][0]['metadata']['title']
+        for doc in db_response['matches']:
+            source_material += f"Content: {doc['metadata']['text']}\n"
 
     new_source_material = {
         "role": "assistant",
@@ -26,7 +29,12 @@ def predict():
 
     llm_response = generate_response(conversation)
 
-    return jsonify(llm_response)
+    response = {
+        "llm_response": llm_response,
+        "topic": topic
+    }
+
+    return jsonify(response)
 
 
 if __name__ == '__main__':

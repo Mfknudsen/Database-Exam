@@ -1,11 +1,12 @@
 import tkinter as tk
 import requests
 from DBHandler import read_or_create_chat_history, write_answer_db, write_question_db, create_new_chat, create_new_user, login_db
+from neo4jDB import suggest_topics, find_message_by_topic
 
 def main_interface():
     root = tk.Tk()
     root.title("Warhammer lore chat bot")
-    root.geometry("800x600")
+    root.geometry("1200x900")
 
     global chat_history
     global user_id
@@ -28,12 +29,17 @@ def main_interface():
         formatted_conversation = format_conversation(conversation)
         result_label.config(text=formatted_conversation)
 
-    def chat():
-        query = query_entry.get()
+    def chat(explore_query):
+        query = ""
+        original = True
+        if explore_query:
+            query = explore_query
+            original = False
+        else:
+            query = query_entry.get()
         new_question = {'role': 'user', 'content': query}
         global conversation
         conversation.append(new_question)
-        write_question_db(conversation_id, new_question, True)
 
         url = 'http://127.0.0.1:5003/chat'  # Change this if your Flask app runs on a different port
         data = {
@@ -43,9 +49,16 @@ def main_interface():
         }
         response = requests.post(url, json=data)
 
-        new_answer = {'role': 'assistant', 'content': response.json()}
+        llm_response = response.json().get('llm_response')
+        topic = response.json().get('topic')
+
+        new_question['topic'] = topic
+
+        write_question_db(conversation_id, new_question, original)
+        new_answer = {'role': 'assistant', 'content': llm_response}
         conversation.append(new_answer)
         write_answer_db(conversation_id, new_answer)
+
         update_result_label()
         update_buttons()
 
@@ -83,6 +96,11 @@ def main_interface():
         update_buttons()
         update_result_label()
 
+    def explore(topic):
+        query = find_message_by_topic(topic)
+        new_chat()
+        chat(query)
+
     def create_button(root, title, number):
         button = tk.Button(root, text=title, width=20, command=lambda: set_chat_history_no(number))
         button.pack(side="bottom", anchor="w", padx=10, pady=5)
@@ -101,9 +119,18 @@ def main_interface():
                     button_array.append(button)
                     break
 
+    def create_explore_button(root, topic):
+        button = tk.Button(root, text=topic, width=15, command=lambda: explore(topic))
+        button.pack(anchor="e", side="bottom", padx=10, pady=5)
+        return button
+    
+    suggested_topics = suggest_topics(str(user_id))
+    for topic in suggested_topics:
+        create_explore_button(root, topic['name'])
+
     query_entry = create_entry_with_label(root, "Ask away: ")
 
-    predict_button = tk.Button(root, text="Send", command=chat)
+    predict_button = tk.Button(root, text="Send", command=lambda: chat(None))
     predict_button.pack()
 
     formatted_conversation = format_conversation(conversation)
@@ -168,7 +195,7 @@ def login_screen():
             else:
                 error_label.config(text=f"Signup Error: {result['message']}")
 
-    def create_entry_with_label(root, label_text, width=30, is_password=False):
+    def create_entry_with_label(root, label_text, width=30):
         frame = tk.Frame(root)
         frame.pack(pady=10)
 

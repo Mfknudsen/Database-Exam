@@ -19,7 +19,7 @@ def get_embeddings(text):
     return client.embeddings.create(input = [text], model="text-embedding-3-small").data[0].embedding
 
 
-def vector_search(query, num_results=5):
+def vector_search(query, num_results=5, min_score=0.3):
     query_emb = get_embeddings(query)
     pipeline = index.query(
         vector=query_emb,
@@ -27,6 +27,11 @@ def vector_search(query, num_results=5):
         include_values=False,
         include_metadata=True,
     )
+
+    filtered_matches = [match for match in pipeline['matches'] if match['score'] >= min_score]
+
+    pipeline['matches'] = filtered_matches
+    
     return pipeline
 
 def generate_response(conversation):
